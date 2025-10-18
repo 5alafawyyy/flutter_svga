@@ -16,6 +16,10 @@ class SVGAAudioLayer {
 
   Future<void> playAudio() async {
     if (_disposed) return;
+
+    // Prevent duplicate playback if already playing or preparing to play
+    if (_isReady || isPlaying()) return;
+
     final audioData = _videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
       // https://github.com/bluefireteam/audioplayers/issues/1782
@@ -29,15 +33,14 @@ class SVGAAudioLayer {
       }
 
       try {
-        if (!_isReady) {
-          _isReady = true;
-          await _player.play(DeviceFileSource(cacheFile.path));
-          _isReady = false;
-        }
+        _isReady = true;
+        await _player.play(DeviceFileSource(cacheFile.path));
+        _isReady = false;
         // I noticed that this logic exists in the iOS code of SVGAPlayer
         // but it seems unnecessary.
         // _player.seek(Duration(milliseconds: audioItem.startTime.toInt()));
       } catch (e) {
+        _isReady = false;
         log('Failed to play audio: $e');
       }
     }
