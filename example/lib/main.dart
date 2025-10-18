@@ -513,7 +513,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen> with SingleTickerPr
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Switch(value: value, onChanged: onChanged, activeThumbColor: Colors.blue),
+          Switch(value: value, onChanged: onChanged, activeColor: Colors.blue),
         ],
       ),
     );

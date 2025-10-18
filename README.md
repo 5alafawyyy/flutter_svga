@@ -29,7 +29,7 @@ Add **flutter_svga** to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_svga: ^0.0.6
+  flutter_svga: ^0.0.8
 ```
 Then, install dependencies:
 
@@ -245,6 +245,23 @@ This package is licensed under the **MIT License**. See [`LICENSE`](LICENSE) for
 ## 🤝 **Contributing**
 - If you find a **bug**, report it [here](https://github.com/5alafawyyy/flutter_svga/issues).
 - Pull requests are welcome! See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.
+
+---
+
+## 👨‍💻 **Authors & Contributors**
+
+### 🏗 **Core Author**
+- **[5alafawyyy](https://github.com/5alafawyyy)** — Lead Developer, Maintainer, and Flutter Integration Engineer.
+
+
+### 🤝 **Contributors**
+Special thanks to the amazing contributors who improved **flutter_svga**:
+
+| Contributor | Contribution | GitHub |
+|--------------|--------------|--------|
+| **[wonderkidshihab](https://github.com/wonderkidshihab)** | Fixed repeated music playback bug (#3) | 🧩 |
+
+> Want to contribute? Read [CONTRIBUTING.md](CONTRIBUTING.md) and submit your PR — we’d love your help!
 
 ---
 
