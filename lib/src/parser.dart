@@ -7,6 +7,7 @@ import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' show get;
 
+import 'cache.dart';
 import 'proto/svga.pbserver.dart';
 
 const _filterKey = 'SVGAParser';
@@ -17,14 +18,41 @@ class SVGAParser {
   static const shared = SVGAParser();
 
   /// Download animation file from remote server, and decode it.
+  /// Automatically uses cache if available and enabled.
   Future<MovieEntity> decodeFromURL(String url) async {
+    // Try to get from cache first
+    final cachedBytes = await SVGACache.shared.getRawBytes(url);
+    if (cachedBytes != null) {
+      return decodeFromBuffer(cachedBytes);
+    }
+
+    // Download and cache
     final response = await get(Uri.parse(url));
-    return decodeFromBuffer(response.bodyBytes);
+    final bytes = response.bodyBytes;
+    
+    // Cache the raw response bytes for future use
+    await SVGACache.shared.putRawBytes(url, Uint8List.fromList(bytes));
+    
+    return decodeFromBuffer(bytes);
   }
 
   /// Download animation file from bundle assets, and decode it.
+  /// Automatically uses cache if available and enabled.
   Future<MovieEntity> decodeFromAssets(String path) async {
-    return decodeFromBuffer((await rootBundle.load(path)).buffer.asUint8List());
+    // Try to get from cache first
+    final cachedBytes = await SVGACache.shared.getRawBytes('assets:$path');
+    if (cachedBytes != null) {
+      return decodeFromBuffer(cachedBytes);
+    }
+
+    // Load from assets and cache
+    final byteData = await rootBundle.load(path);
+    final bytes = byteData.buffer.asUint8List();
+    
+    // Cache the asset bytes for future use
+    await SVGACache.shared.putRawBytes('assets:$path', bytes);
+    
+    return decodeFromBuffer(bytes);
   }
 
   /// Download animation file from buffer, and decode it.

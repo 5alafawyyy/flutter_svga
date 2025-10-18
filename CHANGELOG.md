@@ -1,5 +1,19 @@
 # Changelog
 
+
+## [0.0.8] - 2025-10-18
+
+### 🛠 Fixes
+- Fixed repeated music playback bug when reusing the same audio key.  
+  (Thanks to [@wonderkidshihab](https://github.com/wonderkidshihab) for the PR and [@Sansuihe](https://github.com/Sansuihe) for reporting.)
+
+### 🚀 Improvements
+- Optimized audio handling and cache logic for better playback stability.
+- Updated README and credits for contributors.
+- Version bump for pub.dev publication.
+
+---
+
 ## [0.0.7] - 2025-10-18
 
 ### Fixed
@@ -11,6 +25,7 @@
 - Enhanced audio layer synchronization and error handling
 
 ---
+
 
 ## [0.0.6] - 2025-06-26
 

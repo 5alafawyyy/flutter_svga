@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svga/flutter_svga.dart';
-import 'dart:math' as math;
+
+import 'cache_example.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,10 +20,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HomeScreen(),
-      theme: ThemeData(useMaterial3: false),
-    );
+    return MaterialApp(home: HomeScreen(), theme: ThemeData(useMaterial3: false));
   }
 }
 
@@ -69,11 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void _goToSample(BuildContext context, List<String> sample) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => SVGASampleScreen(
-          name: sample.first,
-          image: sample.last,
-          dynamicCallback: dynamicSamples[sample.first],
-        ),
+        builder: (context) =>
+            SVGASampleScreen(name: sample.first, image: sample.last, dynamicCallback: dynamicSamples[sample.first]),
       ),
     );
   }
@@ -84,11 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// This function is used by the "Load SVGA from text field" button in the
   /// [MyApp] widget, to load an animation from a URL entered in the text field.
   void _goToSampleFromInput(BuildContext context, String imageUrl) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SVGASampleScreen(image: imageUrl),
-      ),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => SVGASampleScreen(image: imageUrl)));
   }
 
   /// Load the animation from the URL in the text field, and navigate to
@@ -117,24 +110,14 @@ class _HomeScreenState extends State<HomeScreen> {
         TextPainter(
           text: TextSpan(
             text: "Hello, World!",
-            style: TextStyle(
-              fontSize: 28,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
         "banner",
       )
-      ..setImageWithUrl(
-        "https://github.com/PonyCui/resources/blob/master/svga_replace_avatar.png?raw=true",
-        "99",
-      )
+      ..setImageWithUrl("https://github.com/PonyCui/resources/blob/master/svga_replace_avatar.png?raw=true", "99")
       ..setDynamicDrawer((canvas, frameIndex) {
-        canvas.drawRect(
-          Rect.fromLTWH(0, 0, 88, 88),
-          Paint()..color = Colors.red,
-        ); // draw by yourself.
+        canvas.drawRect(Rect.fromLTWH(0, 0, 88, 88), Paint()..color = Colors.red); // draw by yourself.
       }, "banner"),
   };
 
@@ -152,9 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: InputDecoration(
                 labelText: "Enter SVGA URL",
                 hintText: "Paste an SVGA file URL...",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 prefixIcon: Icon(Icons.link),
                 suffixIcon: IconButton(
                   icon: Icon(Icons.play_arrow, color: Colors.blue),
@@ -166,44 +147,41 @@ class _HomeScreenState extends State<HomeScreen> {
               onSubmitted: (_) => _loadSvgaFromTextField(),
             ),
             SizedBox(height: 16),
+
+            // Cache Example Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SVGACacheExample()));
+                },
+                icon: Icon(Icons.storage),
+                label: Text('Cache Example & Configuration'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 16),
             Expanded(
               child: ListView.separated(
                 itemCount: samples.length,
-                separatorBuilder: (_, _) => Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                  indent: 16,
-                  endIndent: 16,
-                ),
+                separatorBuilder: (_, _) => Divider(color: Colors.grey, thickness: 1, indent: 16, endIndent: 16),
                 itemBuilder: (context, index) {
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.blueAccent,
                       child: Icon(Icons.animation, color: Colors.white),
                     ),
-                    title: Text(
-                      samples[index].first,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    subtitle: Text(
-                      samples[index].last,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    trailing: Icon(
-                      Icons.play_circle_fill_outlined,
-                      color: Colors.blue,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                    title: Text(samples[index].first, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    subtitle: Text(samples[index].last, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    trailing: Icon(Icons.play_circle_fill_outlined, color: Colors.blue),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     tileColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     onTap: () => _goToSample(context, samples[index]),
                   );
                 },
@@ -221,19 +199,13 @@ class SVGASampleScreen extends StatefulWidget {
   final String image;
   final void Function(MovieEntity entity)? dynamicCallback;
 
-  const SVGASampleScreen({
-    super.key,
-    required this.image,
-    this.name,
-    this.dynamicCallback,
-  });
+  const SVGASampleScreen({super.key, required this.image, this.name, this.dynamicCallback});
 
   @override
   State<SVGASampleScreen> createState() => _SVGASampleScreenState();
 }
 
-class _SVGASampleScreenState extends State<SVGASampleScreen>
-    with SingleTickerProviderStateMixin {
+class _SVGASampleScreenState extends State<SVGASampleScreen> with SingleTickerProviderStateMixin {
   SVGAAnimationController? animationController;
   bool isLoading = true;
   Color backgroundColor = Colors.transparent;
@@ -294,10 +266,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen>
         children: <Widget>[
           Container(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Url: ${widget.image}",
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            child: Text("Url: ${widget.image}", style: Theme.of(context).textTheme.headlineSmall),
           ),
           if (isLoading) LinearProgressIndicator(),
           Center(
@@ -320,11 +289,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen>
           ? null
           : FloatingActionButton.extended(
               label: Text(animationController!.isAnimating ? "Pause" : "Play"),
-              icon: Icon(
-                animationController!.isAnimating
-                    ? Icons.pause
-                    : Icons.play_arrow,
-              ),
+              icon: Icon(animationController!.isAnimating ? Icons.pause : Icons.play_arrow),
               onPressed: () {
                 if (animationController?.isAnimating == true) {
                   animationController?.stop();
@@ -367,27 +332,15 @@ class _SVGASampleScreenState extends State<SVGASampleScreen>
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Toggle Button
           ListTile(
-            leading: Icon(
-              hideOptions ? Icons.expand_more : Icons.expand_less,
-              color: Colors.blue,
-            ),
-            title: Text(
-              hideOptions ? "Show Options" : "Hide Options",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            leading: Icon(hideOptions ? Icons.expand_more : Icons.expand_less, color: Colors.blue),
+            title: Text(hideOptions ? "Show Options" : "Hide Options", style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               setState(() {
                 hideOptions = !hideOptions;
@@ -431,8 +384,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen>
                       if (animationController?.isAnimating == true) {
                         animationController?.stop();
                       }
-                      animationController?.value =
-                          v / animationController!.frames;
+                      animationController?.value = v / animationController!.frames;
                     },
                   ),
                 );
@@ -539,10 +491,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen>
             value: value,
             onChanged: onChanged,
             items: items.map((T item) {
-              return DropdownMenuItem(
-                value: item,
-                child: Text(item.toString().split('.').last),
-              );
+              return DropdownMenuItem(value: item, child: Text(item.toString().split('.').last));
             }).toList(),
           ),
         ],
@@ -611,14 +560,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen>
     ///
     /// The colors are displayed in a row, with the selected color highlighted with a
     /// white border.
-    List<Color> colors = [
-      Colors.transparent,
-      Colors.red,
-      Colors.green,
-      Colors.blue,
-      Colors.yellow,
-      Colors.black,
-    ];
+    List<Color> colors = [Colors.transparent, Colors.red, Colors.green, Colors.blue, Colors.yellow, Colors.black];
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -644,12 +586,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen>
                       decoration: BoxDecoration(
                         color: color,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: backgroundColor == color
-                              ? Colors.white
-                              : Colors.grey,
-                          width: 3,
-                        ),
+                        border: Border.all(color: backgroundColor == color ? Colors.white : Colors.grey, width: 3),
                       ),
                     ),
                   ),

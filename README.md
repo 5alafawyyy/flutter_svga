@@ -14,6 +14,7 @@ SVGA is a lightweight and powerful animation format used for **dynamic UI effect
 
 ✔️ Parse and render **SVGA animations** in Flutter.  
 ✔️ Load SVGA files from **assets** and **network URLs**.  
+✔️ **Intelligent caching system** for faster loading and reduced network usage.  
 ✔️ Supports **custom dynamic elements** (text, images, animations).  
 ✔️ **Optimized playback performance** with animation controllers.  
 ✔️ **Integrated audio playback** within SVGA animations.  
@@ -28,7 +29,8 @@ Add **flutter_svga** to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_svga: ^0.0.7
+  flutter_svga: ^0.0.8
+
 ```
 Then, install dependencies:
 
@@ -152,6 +154,29 @@ controller.videoItem!.dynamicItem.setHidden(true, "layer_to_hide");
 
 ---
 
+## 🗄️ **Caching (New!)**
+
+**Automatic performance optimization with zero breaking changes:**
+
+```dart
+// Caching works automatically - no code changes needed!
+final animation = await SVGAParser.shared.decodeFromURL(
+  "https://example.com/animation.svga"
+);
+
+// Optional: Configure cache settings
+SVGACache.shared.setMaxCacheSize(50 * 1024 * 1024); // 50MB
+SVGACache.shared.setMaxAge(const Duration(days: 3)); // 3 days
+
+// Optional: Manage cache
+await SVGACache.shared.clear(); // Clear all cache
+final stats = await SVGACache.shared.getStats(); // Get cache info
+```
+
+**📋 See [CACHE.md](CACHE.md) for complete caching documentation and examples.**
+
+---
+
 ## 🎯 **Playback Controls**
 ```dart
 controller.forward();  // Play once
@@ -221,6 +246,23 @@ This package is licensed under the **MIT License**. See [`LICENSE`](LICENSE) for
 ## 🤝 **Contributing**
 - If you find a **bug**, report it [here](https://github.com/5alafawyyy/flutter_svga/issues).
 - Pull requests are welcome! See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.
+
+---
+
+## 👨‍💻 **Authors & Contributors**
+
+### 🏗 **Core Author**
+- **[5alafawyyy](https://github.com/5alafawyyy)** — Lead Developer, Maintainer, and Flutter Integration Engineer.
+
+
+### 🤝 **Contributors**
+Special thanks to the amazing contributors who improved **flutter_svga**:
+
+| Contributor | Contribution | GitHub |
+|--------------|--------------|--------|
+| **[wonderkidshihab](https://github.com/wonderkidshihab)** | Fixed repeated music playback bug (#3) | 🧩 |
+
+> Want to contribute? Read [CONTRIBUTING.md](CONTRIBUTING.md) and submit your PR — we’d love your help!
 
 ---
 
