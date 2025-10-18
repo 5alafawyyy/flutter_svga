@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.7] - 2025-10-18
+
+### Fixed
+- 🎵 Fixed repeated music playback bug when same audio keys are used (#3)
+- 🛡️ Improved race condition handling in audio playback logic
+- ✅ Added early return check to prevent duplicate audio playback
+
+### Maintenance
+- Enhanced audio layer synchronization and error handling
+
+---
+
 ## [0.0.6] - 2025-06-26
 
 ### Fixed

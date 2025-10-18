@@ -28,7 +28,7 @@ Add **flutter_svga** to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_svga: ^0.0.6
+  flutter_svga: ^0.0.7
 ```
 Then, install dependencies:
 
