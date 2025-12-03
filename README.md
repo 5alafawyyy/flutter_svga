@@ -29,7 +29,7 @@ Add **flutter_svga** to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_svga: ^0.0.8
+  flutter_svga: ^0.0.9
 
 ```
 Then, install dependencies:
@@ -261,6 +261,8 @@ Special thanks to the amazing contributors who improved **flutter_svga**:
 | Contributor | Contribution | GitHub |
 |--------------|--------------|--------|
 | **[wonderkidshihab](https://github.com/wonderkidshihab)** | Fixed repeated music playback bug (#3) | 🧩 |
+| **[Sansuihe](https://github.com/Sansuihe)** | Identified and proposed MD5-based fix for audio cache collision (#6) | 🎵 |
+| **[tungpham6195](https://github.com/tungpham6195)** | Reported protobuf dependency compatibility issue (#7) | 📦 |
 
 > Want to contribute? Read [CONTRIBUTING.md](CONTRIBUTING.md) and submit your PR — we’d love your help!
 
