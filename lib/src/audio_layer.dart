@@ -1,9 +1,11 @@
 import 'dart:developer';
-
-import 'package:path_provider/path_provider.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'proto/svga.pb.dart';
 import 'dart:io';
+
+import 'package:audioplayers/audioplayers.dart';
+import 'package:crypto/crypto.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'proto/svga.pb.dart';
 
 class SVGAAudioLayer {
   final AudioPlayer _player = AudioPlayer();
@@ -26,7 +28,13 @@ class SVGAAudioLayer {
       // If need use Bytes, plz upgrade to audioplayers: ^6.0.0
       // BytesSource source = BytesSource(audioData);
       final cacheDir = await getApplicationCacheDirectory();
-      final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
+
+      // Use MD5 hash to ensure unique cache files even when audioKeys collide
+      // across different SVGA files with different audio content
+      final audioHash = md5.convert(audioData).toString();
+      final cacheFile = File(
+        '${cacheDir.path}/temp_${audioItem.audioKey}_$audioHash.mp3',
+      );
 
       if (!cacheFile.existsSync()) {
         await cacheFile.writeAsBytes(audioData);

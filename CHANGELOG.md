@@ -1,7 +1,21 @@
 # Changelog
 
 
+## [0.0.9] - 2025-12-03
+
+### 🛠 Fixes
+- Fixed audio cache collision bug where different SVGA files with the same `audioKey` but different audio content incorrectly shared cached files (#6).  
+  Now uses MD5 hash of audio data to ensure unique cache files.  
+  (Thanks to [@Sansuihe](https://github.com/Sansuihe) for reporting and suggesting the fix.)
+
+### 🚀 Improvements
+- Protobuf dependency updated to `^6.0.0`, ensuring compatibility with `retrofit_generator >=10.1.0` (#7).  
+  (Thanks to [@tungpham6195](https://github.com/tungpham6195) for reporting.)
+
+---
+
 ## [0.0.8] - 2025-10-18
+
 
 ### 🛠 Fixes
 - Fixed repeated music playback bug when reusing the same audio key.  
