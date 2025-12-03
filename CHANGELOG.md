@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [0.0.10] - 2025-12-03
+
+### 📝 Documentation
+- Updated README to version 0.0.10 for pub.dev visibility
+- Added contributors @Sansuihe and @tungpham6195 to README
+
+---
+
 ## [0.0.9] - 2025-12-03
 
 ### 🛠 Fixes
