@@ -10,6 +10,72 @@ SVGA is a lightweight and powerful animation format used for **dynamic UI effect
 
 ---
 
+## 🎯 **Why flutter_svga?**
+
+### ✅ **Actively Maintained**
+Unlike **`svgaplayer_flutter`** (archived since Feb 2023), `flutter_svga` is **actively maintained** with regular updates, bug fixes, and community support.
+
+### ⚡ **High Performance**
+- **Intelligent caching system** reduces network usage and load times
+- **Binary format** smaller than JSON-based Lottie files
+- **Optimized rendering** for smooth 60 FPS animations
+
+### 🎨 **Feature-Rich**
+- **Audio playback** integrated directly in animations
+- **Dynamic elements** (replace text, images, colors at runtime)
+- **Full platform support** (Android, iOS, Web, macOS, Linux, Windows)
+
+### 📦 **Comparison**
+
+| Feature | flutter_svga | svgaplayer_flutter | Lottie |
+|---------|--------------|-------------------|--------|
+| **Status** | ✅ **Active** | ❌ Archived (Feb 2023) | ✅ Active |
+| **Caching** | ✅ Built-in intelligent cache | ❌ No | ⚠️ Manual |
+| **Audio Support** | ✅ Integrated | ❌ No | ✅ Yes |
+| **File Size** | 🟢 Small (binary) | 🟢 Small (binary) | 🟡 Larger (JSON) |
+| **Dynamic Elements** | ✅ Text, Images, Drawers | ⚠️ Limited | ✅ Yes |
+| **Platform Support** | ✅ All 6 platforms | ⚠️ Mobile only | ✅ All platforms |
+| **Performance** | ⚡ Optimized | ⚡ Good | ⚡ Good |
+
+---
+
+## 🔄 **Migrating from svgaplayer_flutter**
+
+Switching from the archived `svgaplayer_flutter` is simple:
+
+### 1. Update Dependencies
+```yaml
+dependencies:
+  # svgaplayer_flutter: ^2.2.0  # Remove old package
+  flutter_svga: ^0.0.11   # Add new package
+```
+
+### 2. Update Imports
+```dart
+// Old
+// import 'package:svgaplayer_flutter/svgaplayer_flutter.dart';
+
+// New
+import 'package:flutter_svga/flutter_svga.dart';
+```
+
+### 3. API Usage (mostly compatible)
+The API is similar, with some enhancements:
+
+```dart
+// Both packages use similar controller patterns
+SVGAAnimationController controller = SVGAAnimationController(vsync: this);
+
+// Loading remains the same
+final videoItem = await SVGAParser.shared.decodeFromAssets("assets/animation.svga");
+controller.videoItem = videoItem;
+controller.repeat();
+```
+
+**🎉 Bonus**: You now get **automatic caching**, **audio support**, and **better performance** with zero code changes!
+
+---
+
 ## 🚀 **Features**
 
 ✔️ Parse and render **SVGA animations** in Flutter.  
@@ -29,7 +95,8 @@ Add **flutter_svga** to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_svga: ^0.0.10
+  flutter_svga: ^0.0.11
+
 
 ```
 Then, install dependencies:

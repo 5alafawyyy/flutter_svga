@@ -1,5 +1,17 @@
-# Changelog
+## [0.0.11] - 2025-12-10
 
+### 📝 Documentation
+
+- **Enhanced README with competitive positioning**
+  - Added "Why flutter_svga?" section highlighting active maintenance vs archived `svgaplayer_flutter`
+  - Added comparison table (flutter_svga vs svgaplayer_flutter vs Lottie)
+  - Added migration guide for users switching from `svgaplayer_flutter`
+  
+- **Improved SEO & Discoverability**
+  - Updated `pubspec.yaml` description with better keywords (actively maintained, alternative, replacement)
+  - Added relevant topics: animation, svga, vector-graphics, lottie-alternative, ui-effects
+
+---
 
 ## [0.0.10] - 2025-12-03
 
