@@ -47,7 +47,7 @@ Switching from the archived `svgaplayer_flutter` is simple:
 ```yaml
 dependencies:
   # svgaplayer_flutter: ^2.2.0  # Remove old package
-  flutter_svga: ^0.0.11   # Add new package
+  flutter_svga: ^0.0.12   # Add new package
 ```
 
 ### 2. Update Imports
@@ -95,7 +95,7 @@ Add **flutter_svga** to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_svga: ^0.0.11
+  flutter_svga: ^0.0.12
 
 
 ```

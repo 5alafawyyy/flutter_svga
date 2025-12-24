@@ -1,3 +1,11 @@
+## [0.0.12] - 2025-12-24
+
+### 🚀 Improvements
+
+- **Updated Dart SDK constraint** to `^3.10.4` for compatibility with Flutter 3.38.5
+
+---
+
 ## [0.0.11] - 2025-12-10
 
 ### 📝 Documentation
