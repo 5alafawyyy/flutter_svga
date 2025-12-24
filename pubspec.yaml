@@ -1,5 +1,5 @@
 name: flutter_svga
-description: "A Flutter package for rendering SVGA animations with dynamic customization, smooth playback, and high performance. Actively maintained SVGA player for Flutter with intelligent caching, audio support, and dynamic elements. Modern replacement for archived svgaplayer_flutter."
+description: "Flutter SVGA player with intelligent caching, audio support, and dynamic elements. Active replacement for archived svgaplayer_flutter."
 version: 0.0.12
 
 homepage: https://github.com/5alafawyyy/flutter_svga

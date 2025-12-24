@@ -4,6 +4,11 @@
 
 - **Updated Dart SDK constraint** to `^3.10.4` for compatibility with Flutter 3.38.5
 
+### 📝 Maintenance
+
+- **Shortened package description** for pub.dev compliance (under 180 characters)
+- **Fixed lint warnings** in generated protobuf files by adding `no_leading_underscores_for_local_identifiers` to ignore rules
+
 ---
 
 ## [0.0.11] - 2025-12-10
