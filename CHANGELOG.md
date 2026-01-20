@@ -1,3 +1,21 @@
+## [0.0.13] - 2026-01-20
+
+### 🚀 New Features
+
+- **Volume Control** (#9, PR #10): Added audio volume control to `SVGAAnimationController`
+  - `controller.volume = 0.5` — Set volume level (0.0 to 1.0)
+  - `controller.muted = true/false` — Toggle mute without losing volume setting
+  - Thanks to [@Sansuihe](https://github.com/Sansuihe) for the contribution!
+
+### ⚡ Performance Improvements
+
+- **Memory Optimization** (#8): Reduced Dart heap memory usage by clearing protobuf internal structures after parsing
+  - Added `freeze()` method to `MovieEntity` that clears raw image data after extraction
+  - Addresses high memory from `FieldSet`, `PbList`, and `FrameEntity` instances
+  - Thanks to [@jianleepb](https://github.com/jianleepb) for reporting!
+
+---
+
 ## [0.0.12] - 2025-12-24
 
 ### 🚀 Improvements

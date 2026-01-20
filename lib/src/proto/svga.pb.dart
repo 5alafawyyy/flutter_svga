@@ -2162,6 +2162,21 @@ class MovieEntity extends $pb.GeneratedMessage {
   Map<String, ui.Image> bitmapCache = {};
   Map<String, ui.Path> pathCache = {};
   Map<String, Uint8List> audiosData = {};
+  bool _memoryReleased = false;
+
+  /// Releases protobuf internal structures to reduce memory usage.
+  /// Call this after parsing is complete and all resources have been prepared.
+  /// After calling, the raw `images` data is cleared (already processed into
+  /// `bitmapCache` and `audiosData`).
+  void releaseMemory() {
+    if (_memoryReleased) return;
+    _memoryReleased = true;
+    // Clear the raw images map - data already extracted to bitmapCache/audiosData
+    images.clear();
+  }
+
+  /// Returns true if memory has been released.
+  bool get isMemoryReleased => _memoryReleased;
 
   void dispose() {
     bitmapCache.values.forEach((element) {

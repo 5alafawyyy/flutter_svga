@@ -47,7 +47,7 @@ Switching from the archived `svgaplayer_flutter` is simple:
 ```yaml
 dependencies:
   # svgaplayer_flutter: ^2.2.0  # Remove old package
-  flutter_svga: ^0.0.12   # Add new package
+  flutter_svga: ^0.0.13   # Add new package
 ```
 
 ### 2. Update Imports
@@ -95,7 +95,7 @@ Add **flutter_svga** to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_svga: ^0.0.12
+  flutter_svga: ^0.0.13
 
 
 ```
@@ -250,6 +250,20 @@ controller.forward();  // Play once
 controller.repeat();   // Loop playback
 controller.stop();     // Stop animation
 controller.value = 0;  // Reset to first frame
+```
+
+---
+
+## 🔊 **Audio Volume Control**
+```dart
+// Set volume (0.0 to 1.0)
+controller.volume = 0.5;
+
+// Mute audio (preserves volume setting)
+controller.muted = true;
+
+// Unmute audio
+controller.muted = false;
 ```
 
 ---

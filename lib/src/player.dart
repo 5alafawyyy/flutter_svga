@@ -59,9 +59,33 @@ class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   final List<SVGAAudioLayer> _audioLayers = [];
   bool _canvasNeedsClear = false;
+  double _volume = 1.0;
+  bool _muted = false;
 
   SVGAAnimationController({required super.vsync})
     : super(duration: Duration.zero);
+
+  /// Audio volume level (0.0 to 1.0).
+  /// Default is 1.0 (full volume).
+  double get volume => _volume;
+  set volume(double value) {
+    if (_isDisposed) return;
+    _volume = value.clamp(0.0, 1.0);
+    for (final audio in _audioLayers) {
+      audio.setVolume(_muted ? 0.0 : _volume);
+    }
+  }
+
+  /// Whether audio is muted.
+  /// When muted, volume is set to 0 but the volume setting is preserved.
+  bool get muted => _muted;
+  set muted(bool value) {
+    if (_isDisposed) return;
+    _muted = value;
+    for (final audio in _audioLayers) {
+      audio.setVolume(_muted ? 0.0 : _volume);
+    }
+  }
 
   set videoItem(MovieEntity? value) {
     assert(!_isDisposed, '$this has been disposed!');
@@ -200,15 +224,17 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 
   void handleAudio() {
-    final audioLayers = widget._controller._audioLayers;
+    final controller = widget._controller;
+    final audioLayers = controller._audioLayers;
+    final effectiveVolume = controller._muted ? 0.0 : controller._volume;
     for (final audio in audioLayers) {
       if (!audio.isPlaying() &&
-          audio.audioItem.startFrame <= widget._controller.currentFrame &&
-          audio.audioItem.endFrame >= widget._controller.currentFrame) {
-        audio.playAudio();
+          audio.audioItem.startFrame <= controller.currentFrame &&
+          audio.audioItem.endFrame >= controller.currentFrame) {
+        audio.playAudio(volume: effectiveVolume);
       }
       if (audio.isPlaying() &&
-          audio.audioItem.endFrame <= widget._controller.currentFrame) {
+          audio.audioItem.endFrame <= controller.currentFrame) {
         audio.stopAudio();
       }
     }

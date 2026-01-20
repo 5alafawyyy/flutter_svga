@@ -13,10 +13,11 @@ class SVGAAudioLayer {
   late final MovieEntity _videoItem;
   bool _isReady = false;
   bool _disposed = false;
+  double _volume = 1.0;
 
   SVGAAudioLayer(this.audioItem, this._videoItem);
 
-  Future<void> playAudio() async {
+  Future<void> playAudio({double? volume}) async {
     if (_disposed) return;
 
     // Prevent duplicate playback if already playing or preparing to play
@@ -42,6 +43,11 @@ class SVGAAudioLayer {
 
       try {
         _isReady = true;
+        // Apply volume before playing
+        if (volume != null) {
+          _volume = volume.clamp(0.0, 1.0);
+        }
+        await _player.setVolume(_volume);
         await _player.play(DeviceFileSource(cacheFile.path));
         _isReady = false;
         // I noticed that this logic exists in the iOS code of SVGAPlayer
@@ -52,6 +58,14 @@ class SVGAAudioLayer {
         log('Failed to play audio: $e');
       }
     }
+  }
+
+  /// Sets the volume for this audio layer.
+  /// [volume] should be between 0.0 (mute) and 1.0 (max volume).
+  void setVolume(double volume) {
+    if (_disposed) return;
+    _volume = volume.clamp(0.0, 1.0);
+    _player.setVolume(_volume);
   }
 
   void pauseAudio() {

@@ -29,10 +29,10 @@ class SVGAParser {
     // Download and cache
     final response = await get(Uri.parse(url));
     final bytes = response.bodyBytes;
-    
+
     // Cache the raw response bytes for future use
     await SVGACache.shared.putRawBytes(url, Uint8List.fromList(bytes));
-    
+
     return decodeFromBuffer(bytes);
   }
 
@@ -48,10 +48,10 @@ class SVGAParser {
     // Load from assets and cache
     final byteData = await rootBundle.load(path);
     final bytes = byteData.buffer.asUint8List();
-    
+
     // Cache the asset bytes for future use
     await SVGACache.shared.putRawBytes('assets:$path', bytes);
-    
+
     return decodeFromBuffer(bytes);
   }
 
@@ -64,13 +64,17 @@ class SVGAParser {
     }
     final inflatedBytes = const archive.ZLibDecoder().decodeBytes(bytes);
     if (timeline != null) {
-      timeline.instant('MovieEntity.fromBuffer()',
-          arguments: {'inflatedLength': inflatedBytes.length});
+      timeline.instant(
+        'MovieEntity.fromBuffer()',
+        arguments: {'inflatedLength': inflatedBytes.length},
+      );
     }
     final movie = MovieEntity.fromBuffer(inflatedBytes);
     if (timeline != null) {
-      timeline.instant('prepareResources()',
-          arguments: {'images': movie.images.keys.join(',')});
+      timeline.instant(
+        'prepareResources()',
+        arguments: {'images': movie.images.keys.join(',')},
+      );
     }
     return _prepareResources(
       _processShapeItems(movie),
@@ -97,27 +101,44 @@ class SVGAParser {
     return movieItem;
   }
 
-  Future<MovieEntity> _prepareResources(MovieEntity movieItem,
-      {TimelineTask? timeline}) {
+  Future<MovieEntity> _prepareResources(
+    MovieEntity movieItem, {
+    TimelineTask? timeline,
+  }) {
     final images = movieItem.images;
-    if (images.isEmpty) return Future.value(movieItem);
-    return Future.wait(images.entries.map((item) async {
-      // result null means a decoding error occurred
-      Uint8List data = Uint8List.fromList(item.value);
-      if (isMP3Data(data)) {
-        movieItem.audiosData[item.key] = data;
-      } else {
-        final decodeImage =
-            await _decodeImageItem(item.key, data, timeline: timeline);
-        if (decodeImage != null) {
-          movieItem.bitmapCache[item.key] = decodeImage;
+    if (images.isEmpty) {
+      movieItem.releaseMemory();
+      return Future.value(movieItem);
+    }
+    return Future.wait(
+      images.entries.map((item) async {
+        // result null means a decoding error occurred
+        Uint8List data = Uint8List.fromList(item.value);
+        if (isMP3Data(data)) {
+          movieItem.audiosData[item.key] = data;
+        } else {
+          final decodeImage = await _decodeImageItem(
+            item.key,
+            data,
+            timeline: timeline,
+          );
+          if (decodeImage != null) {
+            movieItem.bitmapCache[item.key] = decodeImage;
+          }
         }
-      }
-    })).then((_) => movieItem);
+      }),
+    ).then((_) {
+      // Release protobuf internal structures to reduce memory
+      movieItem.releaseMemory();
+      return movieItem;
+    });
   }
 
-  Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
-      {TimelineTask? timeline}) async {
+  Future<ui.Image?> _decodeImageItem(
+    String key,
+    Uint8List bytes, {
+    TimelineTask? timeline,
+  }) async {
     TimelineTask? task;
     if (!kReleaseMode) {
       task = TimelineTask(filterKey: _filterKey, parent: timeline)
@@ -126,9 +147,7 @@ class SVGAParser {
     try {
       final image = await decodeImageFromList(bytes);
       if (task != null) {
-        task.finish(
-          arguments: {'imageSize': '${image.width}x${image.height}'},
-        );
+        task.finish(arguments: {'imageSize': '${image.width}x${image.height}'});
       }
       return image;
     } catch (e, stack) {
@@ -136,15 +155,17 @@ class SVGAParser {
         task.finish(arguments: {'error': '$e', 'stack': '$stack'});
       }
       assert(() {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: e,
-          stack: stack,
-          library: 'svgaplayer',
-          context: ErrorDescription('during prepare resource'),
-          informationCollector: () sync* {
-            yield ErrorSummary('Decoding image failed.');
-          },
-        ));
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: e,
+            stack: stack,
+            library: 'svgaplayer',
+            context: ErrorDescription('during prepare resource'),
+            informationCollector: () sync* {
+              yield ErrorSummary('Decoding image failed.');
+            },
+          ),
+        );
         return true;
       }());
       return null;
