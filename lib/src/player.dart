@@ -36,14 +36,14 @@ class SVGAImage extends StatefulWidget {
   /// Defaults to null.
   final Size? preferredSize;
   const SVGAImage(
-    this._controller, {
-    super.key,
-    this.fit = BoxFit.contain,
-    this.filterQuality = FilterQuality.low,
-    this.allowDrawingOverflow,
-    this.clearsAfterStop = true,
-    this.preferredSize,
-  });
+      this._controller, {
+        super.key,
+        this.fit = BoxFit.contain,
+        this.filterQuality = FilterQuality.low,
+        this.allowDrawingOverflow,
+        this.clearsAfterStop = true,
+        this.preferredSize,
+      });
 
   @override
   State<StatefulWidget> createState() => _SVGAImageState();
@@ -60,8 +60,16 @@ class SVGAAnimationController extends AnimationController {
   final List<SVGAAudioLayer> _audioLayers = [];
   bool _canvasNeedsClear = false;
 
+  double _volume = 1;
+
   SVGAAnimationController({required super.vsync})
-    : super(duration: Duration.zero);
+      : super(duration: Duration.zero);
+
+  /// setting volume
+  set volume(double e) {
+    if (_isDisposed) return;
+    _volume = e;
+  }
 
   set videoItem(MovieEntity? value) {
     assert(!_isDisposed, '$this has been disposed!');
@@ -79,10 +87,10 @@ class SVGAAnimationController extends AnimationController {
     if (value != null) {
       final movieParams = value.params;
       assert(
-        movieParams.viewBoxWidth >= 0 &&
-            movieParams.viewBoxHeight >= 0 &&
-            movieParams.frames >= 1,
-        "Invalid SVGA file!",
+      movieParams.viewBoxWidth >= 0 &&
+          movieParams.viewBoxHeight >= 0 &&
+          movieParams.frames >= 1,
+      "Invalid SVGA file!",
       );
       int fps = movieParams.fps;
       // avoid dividing by 0, use 20 by default
@@ -130,8 +138,8 @@ class SVGAAnimationController extends AnimationController {
   @override
   TickerFuture forward({double? from}) {
     assert(
-      _videoItem != null,
-      'SVGAAnimationController.forward() called after dispose()?',
+    _videoItem != null,
+    'SVGAAnimationController.forward() called after dispose()?',
     );
     return super.forward(from: from);
   }
@@ -205,7 +213,7 @@ class _SVGAImageState extends State<SVGAImage> {
       if (!audio.isPlaying() &&
           audio.audioItem.startFrame <= widget._controller.currentFrame &&
           audio.audioItem.endFrame >= widget._controller.currentFrame) {
-        audio.playAudio();
+        audio.playAudio(volume: widget._controller._volume);
       }
       if (audio.isPlaying() &&
           audio.audioItem.endFrame <= widget._controller.currentFrame) {
