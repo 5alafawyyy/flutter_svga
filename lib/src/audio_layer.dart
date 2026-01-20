@@ -16,7 +16,7 @@ class SVGAAudioLayer {
 
   SVGAAudioLayer(this.audioItem, this._videoItem);
 
-  Future<void> playAudio() async {
+  Future<void> playAudio({double? volume}) async {
     if (_disposed) return;
 
     // Prevent duplicate playback if already playing or preparing to play
@@ -42,6 +42,9 @@ class SVGAAudioLayer {
 
       try {
         _isReady = true;
+        if(volume != null){
+          _player.setVolume(volume);
+        }
         await _player.play(DeviceFileSource(cacheFile.path));
         _isReady = false;
         // I noticed that this logic exists in the iOS code of SVGAPlayer

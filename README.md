@@ -221,6 +221,13 @@ controller.videoItem!.dynamicItem.setHidden(true, "layer_to_hide");
 
 ---
 
+### ✅ **setting volume**
+```dart
+controller.volume = 0;
+```
+
+---
+
 ## 🗄️ **Caching (New!)**
 
 **Automatic performance optimization with zero breaking changes:**
