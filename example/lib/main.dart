@@ -292,7 +292,9 @@ class _SVGASampleScreenState extends State<SVGASampleScreen> with SingleTickerPr
               icon: Icon(animationController!.isAnimating ? Icons.pause : Icons.play_arrow),
               onPressed: () {
                 if (animationController?.isAnimating == true) {
-                  animationController?.stop();
+                  animationController?.pause();
+                } else if (animationController?.isPaused == true) {
+                  animationController?.resume();
                 } else {
                   _playAnimation();
                 }
@@ -392,6 +394,27 @@ class _SVGASampleScreenState extends State<SVGASampleScreen> with SingleTickerPr
             ),
 
             SizedBox(height: 8),
+
+            // Audio Volume & Mute Controls
+            _buildSlider(
+              context,
+              label: "Audio Volume (${((animationController?.volume ?? 1.0) * 100).round()}%)",
+              value: animationController?.volume ?? 1.0,
+              min: 0.0,
+              max: 1.0,
+              onChanged: (v) {
+                setState(() {
+                  animationController?.volume = v;
+                });
+              },
+            ),
+            _buildSwitch("Mute Audio", animationController?.muted ?? false, (v) {
+              setState(() {
+                animationController?.muted = v;
+              });
+            }),
+
+            Divider(),
 
             // Image Filter Quality
             _buildDropdown(
@@ -513,7 +536,7 @@ class _SVGASampleScreenState extends State<SVGASampleScreen> with SingleTickerPr
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Switch(value: value, onChanged: onChanged, activeColor: Colors.blue),
+          Switch(value: value, onChanged: onChanged, activeThumbColor: Colors.blue),
         ],
       ),
     );

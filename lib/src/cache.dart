@@ -49,7 +49,7 @@ class SVGACache {
     try {
       final tempDir = await getTemporaryDirectory();
       _cacheDir = Directory('${tempDir.path}/svga_cache');
-      
+
       if (!await _cacheDir!.exists()) {
         await _cacheDir!.create(recursive: true);
       }
@@ -67,7 +67,7 @@ class SVGACache {
   /// Get cache file path for a source
   Future<File?> _getCacheFile(String source) async {
     if (!_enabled) return null;
-    
+
     await _ensureCacheDir();
     if (_cacheDir == null) return null;
 
@@ -78,10 +78,10 @@ class SVGACache {
   /// Check if cached data exists and is still valid
   Future<bool> _isCacheValid(File cacheFile) async {
     if (!await cacheFile.exists()) return false;
-    
+
     final stat = await cacheFile.stat();
     final age = DateTime.now().difference(stat.modified);
-    
+
     return age <= _maxAge;
   }
 

@@ -19,40 +19,71 @@ class SVGAParser {
 
   /// Download animation file from remote server, and decode it.
   /// Automatically uses cache if available and enabled.
-  Future<MovieEntity> decodeFromURL(String url) async {
-    // Try to get from cache first
-    final cachedBytes = await SVGACache.shared.getRawBytes(url);
-    if (cachedBytes != null) {
-      return decodeFromBuffer(cachedBytes);
+  ///
+  /// Set [useCache] to `false` to bypass reading from or writing to [SVGACache]
+  /// for this specific request.
+  Future<MovieEntity> decodeFromURL(String url, {bool useCache = true}) async {
+    if (useCache) {
+      final cachedBytes = await SVGACache.shared.getRawBytes(url);
+      if (cachedBytes != null) {
+        try {
+          return await decodeFromBuffer(cachedBytes);
+        } catch (_) {
+          // Evict corrupted cache data and fallback to network fetch
+          await SVGACache.shared.remove(url);
+        }
+      }
     }
 
-    // Download and cache
+    // Download and verify HTTP status before decoding
     final response = await get(Uri.parse(url));
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to load SVGA from URL ($url): HTTP ${response.statusCode}',
+      );
+    }
     final bytes = response.bodyBytes;
+    final movie = await decodeFromBuffer(bytes);
 
-    // Cache the raw response bytes for future use
-    await SVGACache.shared.putRawBytes(url, Uint8List.fromList(bytes));
+    // Cache the raw response bytes after successful decoding
+    if (useCache) {
+      await SVGACache.shared.putRawBytes(url, Uint8List.fromList(bytes));
+    }
 
-    return decodeFromBuffer(bytes);
+    return movie;
   }
 
   /// Download animation file from bundle assets, and decode it.
   /// Automatically uses cache if available and enabled.
-  Future<MovieEntity> decodeFromAssets(String path) async {
-    // Try to get from cache first
-    final cachedBytes = await SVGACache.shared.getRawBytes('assets:$path');
-    if (cachedBytes != null) {
-      return decodeFromBuffer(cachedBytes);
+  ///
+  /// Set [useCache] to `false` to bypass reading from or writing to [SVGACache]
+  /// for this specific request.
+  Future<MovieEntity> decodeFromAssets(
+    String path, {
+    bool useCache = true,
+  }) async {
+    if (useCache) {
+      final cachedBytes = await SVGACache.shared.getRawBytes('assets:$path');
+      if (cachedBytes != null) {
+        try {
+          return await decodeFromBuffer(cachedBytes);
+        } catch (_) {
+          await SVGACache.shared.remove('assets:$path');
+        }
+      }
     }
 
-    // Load from assets and cache
+    // Load from assets
     final byteData = await rootBundle.load(path);
     final bytes = byteData.buffer.asUint8List();
+    final movie = await decodeFromBuffer(bytes);
 
-    // Cache the asset bytes for future use
-    await SVGACache.shared.putRawBytes('assets:$path', bytes);
+    // Cache the asset bytes after successful decoding
+    if (useCache) {
+      await SVGACache.shared.putRawBytes('assets:$path', bytes);
+    }
 
-    return decodeFromBuffer(bytes);
+    return movie;
   }
 
   /// Download animation file from buffer, and decode it.
@@ -88,11 +119,11 @@ class SVGAParser {
     for (var sprite in movieItem.sprites) {
       List<ShapeEntity>? lastShape;
       for (var frame in sprite.frames) {
-        if (frame.shapes.isNotEmpty && frame.shapes.isNotEmpty) {
+        if (frame.shapes.isNotEmpty) {
           if (frame.shapes[0].type == ShapeEntity_ShapeType.KEEP &&
               lastShape != null) {
             frame.shapes = lastShape;
-          } else if (frame.shapes.isNotEmpty == true) {
+          } else if (frame.shapes.isNotEmpty) {
             lastShape = frame.shapes;
           }
         }
@@ -173,12 +204,16 @@ class SVGAParser {
   }
 
   bool isMP3Data(Uint8List data) {
+    if (data.length < 3) return false;
     const mp3MagicNumber = 'ID3';
-    bool result = false;
     if (String.fromCharCodes(data.take(mp3MagicNumber.length)) ==
         mp3MagicNumber) {
-      result = true;
+      return true;
     }
-    return result;
+    // Also detect raw MPEG audio frame sync (0xFF followed by 0xE0..0xFF)
+    if (data[0] == 0xFF && (data[1] & 0xE0) == 0xE0) {
+      return true;
+    }
+    return false;
   }
 }

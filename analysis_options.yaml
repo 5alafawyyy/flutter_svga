@@ -10,3 +10,4 @@ analyzer:
     - lib/src/proto/*.pbenum.dart
     - lib/src/proto/*.pbjson.dart
     - lib/src/proto/*.pbserver.dart
+    - build/**

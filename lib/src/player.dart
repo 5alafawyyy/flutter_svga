@@ -61,9 +61,17 @@ class SVGAAnimationController extends AnimationController {
   bool _canvasNeedsClear = false;
   double _volume = 1.0;
   bool _muted = false;
+  bool _isLooping = false;
+  bool _isPaused = false;
 
-  SVGAAnimationController({required super.vsync})
-    : super(duration: Duration.zero);
+  SVGAAnimationController({
+    required super.vsync,
+    double volume = 1.0,
+    bool muted = false,
+  }) : super(duration: Duration.zero) {
+    _volume = volume.clamp(0.0, 1.0);
+    _muted = muted;
+  }
 
   /// Audio volume level (0.0 to 1.0).
   /// Default is 1.0 (full volume).
@@ -72,7 +80,7 @@ class SVGAAnimationController extends AnimationController {
     if (_isDisposed) return;
     _volume = value.clamp(0.0, 1.0);
     for (final audio in _audioLayers) {
-      audio.setVolume(_muted ? 0.0 : _volume);
+      audio.setVolume(effectiveVolume);
     }
   }
 
@@ -83,9 +91,23 @@ class SVGAAnimationController extends AnimationController {
     if (_isDisposed) return;
     _muted = value;
     for (final audio in _audioLayers) {
-      audio.setVolume(_muted ? 0.0 : _volume);
+      audio.setVolume(effectiveVolume);
     }
   }
+
+  /// Effective audio volume taking [muted] state into account (`0.0` when muted, otherwise [volume]).
+  double get effectiveVolume => _muted ? 0.0 : _volume;
+
+  /// Toggles the [muted] state while preserving [volume].
+  void toggleMute() {
+    muted = !_muted;
+  }
+
+  /// Whether the animation is currently paused via [pause].
+  bool get isPaused => _isPaused;
+
+  /// Whether this controller has been disposed.
+  bool get isDisposed => _isDisposed;
 
   set videoItem(MovieEntity? value) {
     assert(!_isDisposed, '$this has been disposed!');
@@ -99,6 +121,10 @@ class SVGAAnimationController extends AnimationController {
     if (_videoItem != null && _videoItem!.autorelease) {
       _videoItem!.dispose();
     }
+    for (final audio in _audioLayers) {
+      audio.dispose();
+    }
+    _audioLayers.clear();
     _videoItem = value;
     if (value != null) {
       final movieParams = value.params;
@@ -117,7 +143,9 @@ class SVGAAnimationController extends AnimationController {
       );
 
       for (var audio in value.audios) {
-        _audioLayers.add(SVGAAudioLayer(audio, value));
+        _audioLayers.add(
+          SVGAAudioLayer(audio, value, initialVolume: effectiveVolume),
+        );
       }
     } else {
       duration = Duration.zero;
@@ -157,15 +185,78 @@ class SVGAAnimationController extends AnimationController {
       _videoItem != null,
       'SVGAAnimationController.forward() called after dispose()?',
     );
+    _isLooping = false;
+    _isPaused = false;
     return super.forward(from: from);
   }
 
   @override
+  TickerFuture repeat({
+    double? min,
+    double? max,
+    bool reverse = false,
+    Duration? period,
+    int? count,
+  }) {
+    assert(
+      _videoItem != null,
+      'SVGAAnimationController.repeat() called after dispose()?',
+    );
+    _isLooping = true;
+    _isPaused = false;
+    return super.repeat(
+      min: min,
+      max: max,
+      reverse: reverse,
+      period: period,
+      count: count,
+    );
+  }
+
+  /// Pauses the animation and any active audio layers at the current frame.
+  void pause() {
+    if (_isDisposed || !isAnimating) return;
+    _isPaused = true;
+    for (final audio in _audioLayers) {
+      audio.pauseAudio();
+    }
+    super.stop(canceled: false);
+  }
+
+  /// Resumes the animation and audio playback from the current frame.
+  TickerFuture resume() {
+    assert(
+      _videoItem != null,
+      'SVGAAnimationController.resume() called with null videoItem!',
+    );
+    if (_isDisposed || _videoItem == null) return TickerFuture.complete();
+    final shouldLoop = _isLooping;
+    _isPaused = false;
+    for (final audio in _audioLayers) {
+      audio.resumeAudio();
+    }
+    if (shouldLoop) {
+      return repeat();
+    }
+    return forward(from: value);
+  }
+
+  @override
   void stop({bool canceled = true}) {
+    _isPaused = false;
     for (final audio in _audioLayers) {
       audio.pauseAudio();
     }
     super.stop(canceled: canceled);
+  }
+
+  @override
+  void reset() {
+    _isPaused = false;
+    for (final audio in _audioLayers) {
+      audio.stopAudio();
+    }
+    super.reset();
   }
 
   bool _isDisposed = false;
@@ -174,6 +265,7 @@ class SVGAAnimationController extends AnimationController {
     for (final audio in _audioLayers) {
       audio.dispose();
     }
+    _audioLayers.clear();
     // auto dispose _videoItem when set null
     videoItem = null;
     _isDisposed = true;
@@ -225,8 +317,9 @@ class _SVGAImageState extends State<SVGAImage> {
 
   void handleAudio() {
     final controller = widget._controller;
+    if (!controller.isAnimating) return;
     final audioLayers = controller._audioLayers;
-    final effectiveVolume = controller._muted ? 0.0 : controller._volume;
+    final effectiveVolume = controller.effectiveVolume;
     for (final audio in audioLayers) {
       if (!audio.isPlaying() &&
           audio.audioItem.startFrame <= controller.currentFrame &&
@@ -234,7 +327,8 @@ class _SVGAImageState extends State<SVGAImage> {
         audio.playAudio(volume: effectiveVolume);
       }
       if (audio.isPlaying() &&
-          audio.audioItem.endFrame <= controller.currentFrame) {
+          (controller.currentFrame < audio.audioItem.startFrame ||
+              controller.currentFrame >= audio.audioItem.endFrame)) {
         audio.stopAudio();
       }
     }
@@ -263,9 +357,8 @@ class _SVGAImageState extends State<SVGAImage> {
     // sugguest the size of CustomPaint
     Size preferredSize = viewBoxSize;
     if (widget.preferredSize != null) {
-      preferredSize = BoxConstraints.tight(
-        widget.preferredSize!,
-      ).constrain(viewBoxSize);
+      preferredSize = BoxConstraints.tight(widget.preferredSize!)
+          .constrain(viewBoxSize);
     }
     return IgnorePointer(
       child: CustomPaint(

@@ -72,6 +72,7 @@ class _SVGACacheExampleState extends State<SVGACacheExample> {
       'https://cdn.jsdelivr.net/gh/svga/SVGA-Samples@master/EmptyState.svga',
     );
     await _refreshCacheStats();
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Specific cache item cleared')),
     );
@@ -81,6 +82,7 @@ class _SVGACacheExampleState extends State<SVGACacheExample> {
   Future<void> _clearAllCache() async {
     await SVGACache.shared.clear();
     await _refreshCacheStats();
+    if (!mounted) return;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('All cache cleared')));

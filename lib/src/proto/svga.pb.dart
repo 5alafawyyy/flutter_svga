@@ -7,8 +7,11 @@
 import 'dart:core' as $core;
 import 'dart:core' show int, bool, double, String, List, Map, override;
 import 'dart:ui' as ui show Image, Path;
+
 import 'package:protobuf/protobuf.dart' as $pb;
+
 import 'dart:typed_data';
+
 import 'svga.pbenum.dart';
 
 export 'svga.pbenum.dart';
@@ -1275,11 +1278,9 @@ class ShapeEntity_ShapeStyle_RGBAColor extends $pb.GeneratedMessage {
   )
   ShapeEntity_ShapeStyle_RGBAColor copyWith(
     void Function(ShapeEntity_ShapeStyle_RGBAColor) updates,
-  ) =>
-      super.copyWith(
-            (message) => updates(message as ShapeEntity_ShapeStyle_RGBAColor),
-          )
-          as ShapeEntity_ShapeStyle_RGBAColor; // ignore: deprecated_member_use
+  ) => super.copyWith(
+    (message) => updates(message as ShapeEntity_ShapeStyle_RGBAColor),
+  ) as ShapeEntity_ShapeStyle_RGBAColor; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static ShapeEntity_ShapeStyle_RGBAColor create() =>

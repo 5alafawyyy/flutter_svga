@@ -1,6 +1,6 @@
 name: flutter_svga
 description: "Flutter SVGA player with intelligent caching, audio support, and dynamic elements. Active replacement for archived svgaplayer_flutter."
-version: 0.0.13
+version: 0.0.14
 
 homepage: https://github.com/5alafawyyy/flutter_svga
 repository: https://github.com/5alafawyyy/flutter_svga
@@ -13,22 +13,21 @@ topics:
   - ui-effects
 
 environment:
-  sdk: ^3.10.7
+  sdk: ^3.13.5
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  archive: ^4.0.7
+  archive: ^4.5.2
   http: ^1.6.0
   path_drawing: ^1.0.1
-  protobuf: ^6.0.0
-  audioplayers: ^6.5.1
-  path_provider: ^2.1.5
+  protobuf: ^6.1.0
+  audioplayers: ^6.8.1
+  path_provider: ^2.1.6
   crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-

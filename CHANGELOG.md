@@ -1,3 +1,36 @@
+## [0.0.14] - 2026-10-16
+
+### 🚀 New Features
+
+- **Enhanced Audio & Volume Architecture** (#9, PR #10):
+  - Added initial `volume` and `muted` parameters to `SVGAAnimationController` constructor
+  - Added `effectiveVolume` getter and `toggleMute()` helper on `SVGAAnimationController`
+  - Added declarative `volume` and `muted` controls to `SVGAEasyPlayer`
+  - Added interactive Audio Volume slider and Mute toggle to the example app
+  - Thanks to [@Sansuihe](https://github.com/Sansuihe) for PR #10!
+- **Pause & Resume Playback**:
+  - Added `controller.pause()`, `controller.resume()`, and `controller.isPaused` to pause and resume animations and synchronized audio layers seamlessly
+- **Expanded `SVGAEasyPlayer` Capabilities**:
+  - Added `loops`, `dynamicCallback`, `onFinished`, `filterQuality`, `allowDrawingOverflow`, `clearsAfterStop`, and `preferredSize`
+- **Per-Request Cache Control**:
+  - Added optional `useCache` parameter to `SVGAParser.decodeFromURL` and `SVGAParser.decodeFromAssets`
+
+### 🛠 Fixes & Hardening
+
+- **Safe Network Caching & Corrupted Cache Recovery**: Verify HTTP 200 status before decoding/caching and automatically evict corrupted cache entries on decode failure
+- **Renderer Range & Path Safety** (#11): Guard sprite frame bounds, clamp RGBA/alpha channels for non-standard SVGA exporters, and support multi-space/scientific-notation SVG paths
+- **MP3 Frame Sync Detection**: Detect both `ID3`-tagged and raw MPEG frame-sync (`0xFF 0xE0`) audio streams in `SVGAParser.isMP3Data`
+- **Audio Layer Lifecycle**: Properly dispose and clear existing audio layers when reassigning `SVGAAnimationController.videoItem` or calling `reset()`, and guard async gaps against post-dispose calls
+
+### 📦 SDK, Dependencies & Tests
+
+- **Updated Flutter & Dart SDK**: Upgraded to Flutter `3.47.7` and Dart SDK constraint `^3.13.5`
+- **Updated Dependencies**: `archive: ^4.5.2`, `protobuf: ^6.1.0`, `audioplayers: ^6.8.1`, `path_provider: ^2.1.6`
+- **Comprehensive Test Suite**: Added unit and widget tests covering volume/mute control, pause/resume lifecycle, memory release, dynamic entities, caching, MP3 detection, and widgets
+- **Professional Documentation**: Redesigned `README.md` with badges, feature guides, and API reference tables
+
+---
+
 ## [0.0.13] - 2026-01-20
 
 ### 🚀 New Features

@@ -14,9 +14,8 @@ class _SVGAPainter extends CustomPainter {
     this.fit = BoxFit.contain,
     this.filterQuality = FilterQuality.low,
     this.clipRect = true,
-  })  : assert(
-            controller.videoItem != null, 'Invalid SVGAAnimationController!'),
-        super(repaint: controller);
+  }) : assert(controller.videoItem != null, 'Invalid SVGAAnimationController!'),
+       super(repaint: controller);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -66,38 +65,48 @@ class _SVGAPainter extends CustomPainter {
           videoItem.dynamicItem.dynamicHidden[imageKey] == true) {
         continue;
       }
+      if (currentFrame < 0 || currentFrame >= sprite.frames.length) {
+        continue;
+      }
       final frameItem = sprite.frames[currentFrame];
       final needTransform = frameItem.hasTransform();
       final needClip = frameItem.hasClipPath();
       if (needTransform) {
         canvas.save();
-        canvas.transform(Float64List.fromList(<double>[
-          frameItem.transform.a,
-          frameItem.transform.b,
-          0.0,
-          0.0,
-          frameItem.transform.c,
-          frameItem.transform.d,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          frameItem.transform.tx,
-          frameItem.transform.ty,
-          0.0,
-          1.0
-        ]));
+        canvas.transform(
+          Float64List.fromList(<double>[
+            frameItem.transform.a,
+            frameItem.transform.b,
+            0.0,
+            0.0,
+            frameItem.transform.c,
+            frameItem.transform.d,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            frameItem.transform.tx,
+            frameItem.transform.ty,
+            0.0,
+            1.0,
+          ]),
+        );
       }
       if (needClip) {
         canvas.save();
         canvas.clipPath(buildDPath(frameItem.clipPath));
       }
-      final frameRect =
-          Rect.fromLTRB(0, 0, frameItem.layout.width, frameItem.layout.height);
-      final frameAlpha =
-          frameItem.hasAlpha() ? (frameItem.alpha * 255).toInt() : 255;
+      final frameRect = Rect.fromLTRB(
+        0,
+        0,
+        frameItem.layout.width,
+        frameItem.layout.height,
+      );
+      final frameAlpha = frameItem.hasAlpha()
+          ? (frameItem.alpha * 255).round().clamp(0, 255)
+          : 255;
       drawBitmap(canvas, imageKey, frameRect, frameAlpha);
       drawShape(canvas, frameItem.shapes, frameAlpha);
       // draw dynamic
@@ -114,8 +123,16 @@ class _SVGAPainter extends CustomPainter {
     }
   }
 
+  int _clampColorChannel(double channel) {
+    if (channel > 1.0) {
+      return channel.round().clamp(0, 255);
+    }
+    return (channel * 255).round().clamp(0, 255);
+  }
+
   void drawBitmap(Canvas canvas, String imageKey, Rect frameRect, int alpha) {
-    final bitmap = videoItem.dynamicItem.dynamicImages[imageKey] ??
+    final bitmap =
+        videoItem.dynamicItem.dynamicImages[imageKey] ??
         videoItem.bitmapCache[imageKey];
     if (bitmap == null) return;
 
@@ -123,10 +140,14 @@ class _SVGAPainter extends CustomPainter {
     bitmapPaint.filterQuality = filterQuality;
     //解决bitmap锯齿问题
     bitmapPaint.isAntiAlias = true;
-    bitmapPaint.color = Color.fromARGB(alpha, 0, 0, 0);
+    bitmapPaint.color = Color.fromARGB(alpha.clamp(0, 255), 0, 0, 0);
 
-    Rect srcRect =
-        Rect.fromLTRB(0, 0, bitmap.width.toDouble(), bitmap.height.toDouble());
+    Rect srcRect = Rect.fromLTRB(
+      0,
+      0,
+      bitmap.width.toDouble(),
+      bitmap.height.toDouble(),
+    );
     Rect dstRect = frameRect;
     canvas.drawImageRect(bitmap, srcRect, dstRect, bitmapPaint);
     drawTextOnBitmap(canvas, imageKey, frameRect, alpha);
@@ -138,24 +159,26 @@ class _SVGAPainter extends CustomPainter {
       final path = buildPath(shape);
       if (shape.hasTransform()) {
         canvas.save();
-        canvas.transform(Float64List.fromList(<double>[
-          shape.transform.a,
-          shape.transform.b,
-          0.0,
-          0.0,
-          shape.transform.c,
-          shape.transform.d,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          shape.transform.tx,
-          shape.transform.ty,
-          0.0,
-          1.0
-        ]));
+        canvas.transform(
+          Float64List.fromList(<double>[
+            shape.transform.a,
+            shape.transform.b,
+            0.0,
+            0.0,
+            shape.transform.c,
+            shape.transform.d,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            shape.transform.tx,
+            shape.transform.ty,
+            0.0,
+            1.0,
+          ]),
+        );
       }
 
       final fill = shape.styles.fill;
@@ -163,11 +186,12 @@ class _SVGAPainter extends CustomPainter {
         final paint = Paint();
         paint.isAntiAlias = true;
         paint.style = PaintingStyle.fill;
+        final fillAlpha = fill.a > 1.0 ? (fill.a / 255.0) : fill.a;
         paint.color = Color.fromARGB(
-          (fill.a * frameAlpha).toInt(),
-          (fill.r * 255).toInt(),
-          (fill.g * 255).toInt(),
-          (fill.b * 255).toInt(),
+          (fillAlpha * frameAlpha).round().clamp(0, 255),
+          _clampColorChannel(fill.r),
+          _clampColorChannel(fill.g),
+          _clampColorChannel(fill.b),
         );
         canvas.drawPath(path, paint);
       }
@@ -176,11 +200,13 @@ class _SVGAPainter extends CustomPainter {
         final paint = Paint();
         paint.style = PaintingStyle.stroke;
         if (shape.styles.stroke.isInitialized()) {
+          final stroke = shape.styles.stroke;
+          final strokeAlpha = stroke.a > 1.0 ? (stroke.a / 255.0) : stroke.a;
           paint.color = Color.fromARGB(
-            (shape.styles.stroke.a * frameAlpha).toInt(),
-            (shape.styles.stroke.r * 255).toInt(),
-            (shape.styles.stroke.g * 255).toInt(),
-            (shape.styles.stroke.b * 255).toInt(),
+            (strokeAlpha * frameAlpha).round().clamp(0, 255),
+            _clampColorChannel(stroke.r),
+            _clampColorChannel(stroke.g),
+            _clampColorChannel(stroke.b),
           );
         }
         paint.strokeWidth = strokeWidth;
@@ -214,19 +240,20 @@ class _SVGAPainter extends CustomPainter {
         List<double> lineDash = [
           shape.styles.lineDashI,
           shape.styles.lineDashII,
-          shape.styles.lineDashIII
+          shape.styles.lineDashIII,
         ];
         if (lineDash[0] > 0 || lineDash[1] > 0) {
           canvas.drawPath(
-              dashPath(
-                path,
-                dashArray: CircularIntervalList([
-                  lineDash[0] < 1.0 ? 1.0 : lineDash[0],
-                  lineDash[1] < 0.1 ? 0.1 : lineDash[1],
-                ]),
-                dashOffset: DashOffset.absolute(lineDash[2]),
-              ),
-              paint);
+            dashPath(
+              path,
+              dashArray: CircularIntervalList([
+                lineDash[0] < 1.0 ? 1.0 : lineDash[0],
+                lineDash[1] < 0.1 ? 0.1 : lineDash[1],
+              ]),
+              dashOffset: DashOffset.absolute(lineDash[2]),
+            ),
+            paint,
+          );
         } else {
           canvas.drawPath(path, paint);
         }
@@ -261,7 +288,9 @@ class _SVGAPainter extends CustomPainter {
       final hv = args.height;
       final crv = args.cornerRadius;
       final rrect = RRect.fromRectAndRadius(
-          Rect.fromLTWH(xv, yv, wv, hv), Radius.circular(crv));
+        Rect.fromLTWH(xv, yv, wv, hv),
+        Radius.circular(crv),
+      );
       if (!rrect.isEmpty) path.addRRect(rrect);
     }
     return path;
@@ -272,9 +301,11 @@ class _SVGAPainter extends CustomPainter {
       return videoItem.pathCache[argD]!;
     }
     path ??= Path();
-    final d = argD.replaceAllMapped(RegExp('([a-df-zA-Z])'), (match) {
-      return "|||${match.group(1)} ";
-    }).replaceAll(RegExp(","), " ");
+    final d = argD
+        .replaceAllMapped(RegExp('([a-df-zA-DF-Z])'), (match) {
+          return "|||${match.group(1)} ";
+        })
+        .replaceAll(RegExp(","), " ");
     var currentPointX = 0.0;
     var currentPointY = 0.0;
     double? currentPointX1;
@@ -287,7 +318,7 @@ class _SVGAPainter extends CustomPainter {
       }
       final firstLetter = segment.substring(0, 1);
       if (_validMethods.contains(firstLetter)) {
-        final args = segment.substring(1).trim().split(" ");
+        final args = segment.substring(1).trim().split(RegExp(r'\s+'));
         if (firstLetter == "M") {
           currentPointX = double.parse(args[0]);
           currentPointY = double.parse(args[1]);
@@ -371,7 +402,11 @@ class _SVGAPainter extends CustomPainter {
             currentPointX = double.parse(args[2]);
             currentPointY = double.parse(args[3]);
             path!.quadraticBezierTo(
-                currentPointX1!, currentPointY1!, currentPointX, currentPointY);
+              currentPointX1!,
+              currentPointY1!,
+              currentPointX,
+              currentPointY,
+            );
           }
         } else if (firstLetter == "s") {
           if (currentPointX1 != null &&
@@ -410,7 +445,11 @@ class _SVGAPainter extends CustomPainter {
           currentPointX = double.parse(args[2]);
           currentPointY = double.parse(args[3]);
           path!.quadraticBezierTo(
-              currentPointX1!, currentPointY1!, currentPointX, currentPointY);
+            currentPointX1!,
+            currentPointY1!,
+            currentPointX,
+            currentPointY,
+          );
         } else if (firstLetter == "q") {
           currentPointX1 = currentPointX + double.parse(args[0]);
           currentPointY1 = currentPointY + double.parse(args[1]);
@@ -432,7 +471,11 @@ class _SVGAPainter extends CustomPainter {
   }
 
   void drawTextOnBitmap(
-      Canvas canvas, String imageKey, Rect frameRect, int frameAlpha) {
+    Canvas canvas,
+    String imageKey,
+    Rect frameRect,
+    int frameAlpha,
+  ) {
     var dynamicText = videoItem.dynamicItem.dynamicText;
     if (dynamicText.isEmpty) return;
     if (dynamicText[imageKey] == null) return;
